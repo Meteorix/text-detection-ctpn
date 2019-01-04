@@ -89,14 +89,17 @@ def load_tf_model():
         graph_def.ParseFromString(f.read())
         sess.graph.as_default()
         tf.import_graph_def(graph_def, name='')
+
     sess.run(tf.global_variables_initializer())
-    return sess
+
+    input_img = sess.graph.get_tensor_by_name('Placeholder:0')
+    output_cls_prob = sess.graph.get_tensor_by_name('Reshape_2:0')
+    output_box_pred = sess.graph.get_tensor_by_name('rpn_bbox_pred/Reshape_1:0')
+
+    return sess, input_img, output_cls_prob, output_box_pred
 
 
-sess = load_tf_model()
-input_img = sess.graph.get_tensor_by_name('Placeholder:0')
-output_cls_prob = sess.graph.get_tensor_by_name('Reshape_2:0')
-output_box_pred = sess.graph.get_tensor_by_name('rpn_bbox_pred/Reshape_1:0')
+sess, input_img, output_cls_prob, output_box_pred = load_tf_model()
 
 
 if __name__ == '__main__':
@@ -107,7 +110,6 @@ if __name__ == '__main__':
     for im_name in im_names:
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print(('Demo for {:s}'.format(im_name)))
-
 
         img = cv2.imread(im_name)
         text_recs, img_drawed, img = text_detect(img)
